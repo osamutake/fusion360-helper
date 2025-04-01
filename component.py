@@ -206,6 +206,21 @@ def comp_move_free(
     return comp.features.moveFeatures.add(inp)
 
 
+def comp_move_rotate(
+    comp: adsk.fusion.Component,
+    entities: adsk.core.Base | Iterable[adsk.core.Base],
+    axis: adsk.core.Base,
+    angle: float | str,
+):
+    """Rotate entities around axis. The axis must have its 
+    AssemblyContext fully upto to the root component."""
+    inp = comp.features.moveFeatures.createInput2(
+        collection(entities),
+    )
+    inp.defineAsRotate(axis, value_input(angle))
+    return comp.features.moveFeatures.add(inp)
+
+
 def comp_split_body(
     comp: adsk.fusion.Component,
     split_bodies: adsk.core.Base | Iterable[adsk.core.Base],
