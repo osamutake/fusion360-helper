@@ -227,13 +227,22 @@ def comp_patch(
         | Iterable[adsk.fusion.Profile]
         | adsk.fusion.SketchCurve
         | Iterable[adsk.fusion.SketchCurve]
+        | adsk.fusion.BRepEdge
     ),
     operation: adsk.fusion.FeatureOperations | int,
 ):
-    inp = comp.features.patchFeatures.createInput(
-        collection(profiles),
-        cast(adsk.fusion.FeatureOperations, operation),
-    )
+    if isinstance(profiles, adsk.fusion.SketchCurve) or isinstance(
+        profiles, adsk.fusion.BRepEdge
+    ):
+        inp = comp.features.patchFeatures.createInput(
+            profiles,
+            cast(adsk.fusion.FeatureOperations, operation),
+        )
+    else:
+        inp = comp.features.patchFeatures.createInput(
+            collection(profiles),
+            cast(adsk.fusion.FeatureOperations, operation),
+        )
     return comp.features.patchFeatures.add(inp)
 
 

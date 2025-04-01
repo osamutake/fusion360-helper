@@ -6,9 +6,9 @@ import adsk.core
 class Vector:
     def __init__(
         self,
-        x: str | float | adsk.core.Vector3D | adsk.core.Point3D = 0,
-        y: float = 0,
-        z: float = 0,
+        x: str | float | adsk.core.Vector3D | adsk.core.Point3D = 0.0,
+        y: float = 0.0,
+        z: float = 0.0,
     ):
         if isinstance(x, str):
             strs = x.removeprefix("(").removesuffix(")").split(",")
