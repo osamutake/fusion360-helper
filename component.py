@@ -7,6 +7,7 @@ import adsk.core, adsk.fusion
 
 from .helpers import collection, value_input
 
+
 def comp_built_joint_revolute(
     comp: adsk.fusion.Component,
     occ1: adsk.fusion.Occurrence,
@@ -24,13 +25,19 @@ def comp_built_joint_revolute(
         geo = adsk.fusion.JointGeometry.createByPlanarFace(
             obj,
             cast(adsk.fusion.BRepEdge, None),
-            cast(adsk.fusion.JointKeyPointTypes, adsk.fusion.JointKeyPointTypes.CenterKeyPoint),
+            cast(
+                adsk.fusion.JointKeyPointTypes,
+                adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
+            ),
         )
     elif isinstance(obj, adsk.fusion.Profile):
         geo = adsk.fusion.JointGeometry.createByProfile(
             obj,
             cast(adsk.fusion.SketchCurve, None),
-            cast(adsk.fusion.JointKeyPointTypes, adsk.fusion.JointKeyPointTypes.CenterKeyPoint),
+            cast(
+                adsk.fusion.JointKeyPointTypes,
+                adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
+            ),
         )
     else:
         geo = adsk.fusion.JointGeometry.createByPoint(obj)
@@ -43,7 +50,10 @@ def comp_built_joint_revolute(
         )
     else:
         inp.setAsRevoluteJointMotion(
-            cast(adsk.fusion.JointDirections, adsk.fusion.JointDirections.CustomJointDirection),
+            cast(
+                adsk.fusion.JointDirections,
+                adsk.fusion.JointDirections.CustomJointDirection,
+            ),
             direction_or_axis_with_context,
         )
     return comp.asBuiltJoints.add(inp)
@@ -59,7 +69,10 @@ def comp_built_joint_revolute2(
     geo = adsk.fusion.JointGeometry.createByPlanarFace(
         face,
         cast(adsk.fusion.BRepEdge, None),
-        cast(adsk.fusion.JointKeyPointTypes, adsk.fusion.JointKeyPointTypes.CenterKeyPoint),
+        cast(
+            adsk.fusion.JointKeyPointTypes,
+            adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
+        ),
     )
     inp = comp.asBuiltJoints.createInput(occ1, occ2, geo)
     if isinstance(direction_or_axis_with_context, int) or isinstance(
@@ -70,7 +83,10 @@ def comp_built_joint_revolute2(
         )
     else:
         inp.setAsRevoluteJointMotion(
-            cast(adsk.fusion.JointDirections, adsk.fusion.JointDirections.CustomJointDirection),
+            cast(
+                adsk.fusion.JointDirections,
+                adsk.fusion.JointDirections.CustomJointDirection,
+            ),
             direction_or_axis_with_context,
         )
     return comp.asBuiltJoints.add(inp)
@@ -93,7 +109,10 @@ def comp_joint_revolute(
         )
     else:
         inp.setAsRevoluteJointMotion(
-            cast(adsk.fusion.JointDirections, adsk.fusion.JointDirections.CustomJointDirection),
+            cast(
+                adsk.fusion.JointDirections,
+                adsk.fusion.JointDirections.CustomJointDirection,
+            ),
             direction_or_axis_with_context,
         )
     return comp.joints.add(inp)
@@ -116,7 +135,10 @@ def comp_joint_slider(
         )
     else:
         inp.setAsSliderJointMotion(
-            cast(adsk.fusion.JointDirections, adsk.fusion.JointDirections.CustomJointDirection),
+            cast(
+                adsk.fusion.JointDirections,
+                adsk.fusion.JointDirections.CustomJointDirection,
+            ),
             direction_or_axis_with_context,
         )
     return comp.joints.add(inp)
@@ -138,7 +160,9 @@ def comp_loft(
     participants: adsk.fusion.BRepBody | list[adsk.fusion.BRepBody] | None = None,
     merge_tangent: bool = False,
 ):
-    inp = comp.features.loftFeatures.createInput(cast(adsk.fusion.FeatureOperations, operation))
+    inp = comp.features.loftFeatures.createInput(
+        cast(adsk.fusion.FeatureOperations, operation)
+    )
     for m in entities:
         inp.loftSections.add(m)
     if participants is not None:
@@ -164,8 +188,16 @@ def comp_rectangular_pattern(
     inp = comp.features.rectangularPatternFeatures.createInput(
         collection(entities),
         axis if not isinstance(axis, tuple) else axis[0],
-        value_input(quantity) if not isinstance(quantity, tuple) else value_input(quantity[0]),
-        value_input(distance) if not isinstance(distance, tuple) else value_input(distance[0]),
+        (
+            value_input(quantity)
+            if not isinstance(quantity, tuple)
+            else value_input(quantity[0])
+        ),
+        (
+            value_input(distance)
+            if not isinstance(distance, tuple)
+            else value_input(distance[0])
+        ),
         cast(
             adsk.fusion.PatternDistanceType,
             (
@@ -177,7 +209,11 @@ def comp_rectangular_pattern(
     )
     if symmetric:
         inp.isSymmetricInDirectionOne = True
-    if isinstance(axis, tuple) and isinstance(quantity, tuple) and isinstance(distance, tuple):
+    if (
+        isinstance(axis, tuple)
+        and isinstance(quantity, tuple)
+        and isinstance(distance, tuple)
+    ):
         inp.setDirectionTwo(axis[1], value_input(quantity[1]), value_input(distance[1]))
         if symmetric:
             inp.isSymmetricInDirectionTwo = True
@@ -212,7 +248,7 @@ def comp_move_rotate(
     axis: adsk.core.Base,
     angle: float | str,
 ):
-    """Rotate entities around axis. The axis must have its 
+    """Rotate entities around axis. The axis must have its
     AssemblyContext fully upto to the root component."""
     inp = comp.features.moveFeatures.createInput2(
         collection(entities),
@@ -264,7 +300,9 @@ def comp_patch(
 def comp_scale(
     comp: adsk.fusion.Component,
     entities: adsk.core.Base | Iterable[adsk.core.Base],
-    center: adsk.fusion.BRepVertex | adsk.fusion.SketchPoint | adsk.fusion.ConstructionPoint,
+    center: (
+        adsk.fusion.BRepVertex | adsk.fusion.SketchPoint | adsk.fusion.ConstructionPoint
+    ),
     scale: float | tuple[float, float, float],
 ):
     inp = comp.features.scaleFeatures.createInput(
@@ -328,7 +366,9 @@ def distance_extent(
     if through_all:
         return adsk.fusion.ThroughAllExtentDefinition.create()
     if symmetric:
-        return adsk.fusion.SymmetricExtentDefinition.create(value_input(distance), full_length)
+        return adsk.fusion.SymmetricExtentDefinition.create(
+            value_input(distance), full_length
+        )
     return adsk.fusion.DistanceExtentDefinition.create(value_input(distance))
 
 
@@ -357,8 +397,12 @@ def comp_extrude(
             full_length = (full_length, full_length)
         if not isinstance(through_all, tuple):
             through_all = (through_all, through_all)
-        extent1 = distance_extent(distance[0], symmetric[0], full_length[0], through_all[0])
-        extent2 = distance_extent(distance[1], symmetric[1], full_length[1], through_all[1])
+        extent1 = distance_extent(
+            distance[0], symmetric[0], full_length[0], through_all[0]
+        )
+        extent2 = distance_extent(
+            distance[1], symmetric[1], full_length[1], through_all[1]
+        )
         adsk.fusion.ThroughAllExtentDefinition.create()
         cast(
             Callable[
@@ -450,7 +494,9 @@ def comp_combine(
     operation: adsk.fusion.FeatureOperations | int,
     keep_tools: bool = False,
 ):
-    inp = comp.features.combineFeatures.createInput(target_body, collection(tool_bodies))
+    inp = comp.features.combineFeatures.createInput(
+        target_body, collection(tool_bodies)
+    )
     inp.operation = cast(adsk.fusion.FeatureOperations, operation)
     inp.isKeepToolBodies = keep_tools
     return comp.features.combineFeatures.add(inp)
@@ -474,6 +520,7 @@ def comp_circular_pattern(
         inp.isSymmetric = True
     inp.patternComputeOption = cast(adsk.fusion.PatternComputeOptions, compute)
     return comp.features.circularPatternFeatures.add(inp)
+
 
 class FeatureOperations:
     join = adsk.fusion.FeatureOperations.JoinFeatureOperation
