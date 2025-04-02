@@ -228,7 +228,7 @@ class Vector:
         """
         return Vector(self.x, self.y, -self.z)
 
-    def rotate(self, angle: float, origin: Vector | None = None):
+    def rotate(self, angle: float, origin: Vector | None = None) -> Vector:
         """
         Rotates the vector around z-axis by a given angle.
 
@@ -303,7 +303,7 @@ class Vector:
         return d - d.dot(normal) * normal + origin
 
 
-def vec(x: float | adsk.core.Point3D | adsk.core.Vector3D = 0, y: float = 0, z: float = 0):
+def vec(x: float | adsk.core.Point3D | adsk.core.Vector3D = 0, y = 0.0, z = 0.0):
     """
     Create a 3D vector with the given x, y and z coordinates.
 
