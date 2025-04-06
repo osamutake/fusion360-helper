@@ -10,8 +10,12 @@ import adsk.core, adsk.fusion
 def message_box(
     s: str,
     title: str = "",
-    buttons: adsk.core.MessageBoxButtonTypes | int = adsk.core.MessageBoxButtonTypes.OKButtonType,
-    icon: adsk.core.MessageBoxIconTypes | int = adsk.core.MessageBoxIconTypes.NoIconIconType,
+    buttons: (
+        adsk.core.MessageBoxButtonTypes | int
+    ) = adsk.core.MessageBoxButtonTypes.OKButtonType,
+    icon: (
+        adsk.core.MessageBoxIconTypes | int
+    ) = adsk.core.MessageBoxIconTypes.NoIconIconType,
     terminate: bool = False,
 ):
     result = adsk.core.Application.get().userInterface.messageBox(
@@ -30,6 +34,7 @@ def read_script_manifest(file: str) -> dict:
     with open(file.removesuffix(".py") + ".manifest", "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 def value_input(v: str | float | bool | int | adsk.core.Base):
     if isinstance(v, str):
         return adsk.core.ValueInput.createByString(v)
@@ -38,6 +43,7 @@ def value_input(v: str | float | bool | int | adsk.core.Base):
     if isinstance(v, float) or isinstance(v, int):
         return adsk.core.ValueInput.createByReal(v)
     return adsk.core.ValueInput.createByObject(v)
+
 
 def collection(arg: adsk.core.Base | Iterable[adsk.core.Base]):
     if isinstance(arg, Iterable):
@@ -80,3 +86,13 @@ def pip_install(modules: Iterable[str]):
 
     importlib.invalidate_caches()
     return result
+
+
+def sketch_fix_all(sketch: adsk.fusion.Sketch):
+    """Fix all sketch constraints"""
+    for p in sketch.sketchPoints:
+        p.isFixed = True
+    for c in sketch.sketchCurves:
+        c.isFixed = True
+    for t in sketch.sketchTexts:
+        t.isFixed = True
