@@ -523,11 +523,11 @@ def comp_circular_pattern(
 
 
 class FeatureOperations:
-    join = adsk.fusion.FeatureOperations.JoinFeatureOperation
-    cut = adsk.fusion.FeatureOperations.CutFeatureOperation
-    intersect = adsk.fusion.FeatureOperations.IntersectFeatureOperation
-    new_body = adsk.fusion.FeatureOperations.NewBodyFeatureOperation
-    new_component = adsk.fusion.FeatureOperations.NewComponentFeatureOperation
+    join = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.JoinFeatureOperation)
+    cut = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.CutFeatureOperation)
+    intersect = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.IntersectFeatureOperation)
+    new_body = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+    new_component = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.NewComponentFeatureOperation)
 
     def __init__(self):
         pass
