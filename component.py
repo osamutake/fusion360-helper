@@ -18,8 +18,12 @@ def comp_built_joint_revolute(
         | adsk.fusion.BRepVertex
         | adsk.fusion.BRepFace
         | adsk.fusion.Profile
+        | adsk.fusion.BRepEdge
+        | adsk.fusion.SketchCurve
     ),
-    direction_or_axis_with_context: int | adsk.fusion.JointDirections | adsk.core.Base,
+    direction_or_axis_with_context: int | adsk.fusion.JointDirections | adsk.core.Base
+     = cast(adsk.fusion.JointDirections, adsk.fusion.JointDirections.ZAxisJointDirection),
+    point_type: adsk.fusion.JointKeyPointTypes | int | None = None,
 ):
     if isinstance(obj, adsk.fusion.BRepFace):
         geo = adsk.fusion.JointGeometry.createByPlanarFace(
@@ -28,7 +32,7 @@ def comp_built_joint_revolute(
             cast(
                 adsk.fusion.JointKeyPointTypes,
                 adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
-            ),
+            ) if point_type is None else cast(adsk.fusion.JointKeyPointTypes, point_type)
         )
     elif isinstance(obj, adsk.fusion.Profile):
         geo = adsk.fusion.JointGeometry.createByProfile(
@@ -37,7 +41,17 @@ def comp_built_joint_revolute(
             cast(
                 adsk.fusion.JointKeyPointTypes,
                 adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
-            ),
+            ) if point_type is None else cast(adsk.fusion.JointKeyPointTypes, point_type)
+        )
+    elif isinstance(obj, adsk.fusion.SketchCurve) or isinstance(
+        obj, adsk.fusion.BRepEdge
+    ):
+        geo = adsk.fusion.JointGeometry.createByCurve(
+            obj,
+            cast(
+                adsk.fusion.JointKeyPointTypes,
+                adsk.fusion.JointKeyPointTypes.StartKeyPoint,
+            ) if point_type is None else cast(adsk.fusion.JointKeyPointTypes, point_type)
         )
     else:
         geo = adsk.fusion.JointGeometry.createByPoint(obj)
@@ -157,7 +171,7 @@ def comp_loft(
     comp: adsk.fusion.Component,
     operation: adsk.fusion.FeatureOperations | int,
     entities: list[adsk.core.Base],
-    participants: adsk.fusion.BRepBody | list[adsk.fusion.BRepBody] | None = None,
+    participants: adsk.fusion.BRepBody | Iterable[adsk.fusion.BRepBody] | None = None,
     merge_tangent: bool = False,
 ):
     inp = comp.features.loftFeatures.createInput(
@@ -166,7 +180,9 @@ def comp_loft(
     for m in entities:
         inp.loftSections.add(m)
     if participants is not None:
-        if not isinstance(participants, list):
+        if isinstance(participants, Iterable):
+            participants = list(participants)
+        else:
             participants = [participants]
         inp.participantBodies = participants
     inp.isTangentEdgesMerged = merge_tangent
@@ -523,11 +539,25 @@ def comp_circular_pattern(
 
 
 class FeatureOperations:
-    join = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.JoinFeatureOperation)
-    cut = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.CutFeatureOperation)
-    intersect = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.IntersectFeatureOperation)
-    new_body = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
-    new_component = cast(adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.NewComponentFeatureOperation)
+    join = cast(
+        adsk.fusion.FeatureOperations,
+        adsk.fusion.FeatureOperations.JoinFeatureOperation,
+    )
+    cut = cast(
+        adsk.fusion.FeatureOperations, adsk.fusion.FeatureOperations.CutFeatureOperation
+    )
+    intersect = cast(
+        adsk.fusion.FeatureOperations,
+        adsk.fusion.FeatureOperations.IntersectFeatureOperation,
+    )
+    new_body = cast(
+        adsk.fusion.FeatureOperations,
+        adsk.fusion.FeatureOperations.NewBodyFeatureOperation,
+    )
+    new_component = cast(
+        adsk.fusion.FeatureOperations,
+        adsk.fusion.FeatureOperations.NewComponentFeatureOperation,
+    )
 
     def __init__(self):
         pass

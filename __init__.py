@@ -5,5 +5,6 @@ from .curve3d import *
 from .helpers import *
 from .matrix import *
 from .point3d import *
+from .sketch import *
 from .vector import *
 from .vector3d import *

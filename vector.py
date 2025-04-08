@@ -261,6 +261,15 @@ class Vector:
         """
         return self + other.rotate(angle)
 
+    def rotate_axis(self, axis: Vector, angle: float):
+        """rotate v around axis by angle (in radians)"""
+        axis = axis.normalize()
+        cos_a = math.cos(angle)
+        sin_a = math.sin(angle)
+        dot = self.dot(axis)
+        cross = self.cross(axis)
+        return self * cos_a + cross * sin_a + axis * dot * (1 - cos_a)
+
     def to_polar(self):
         """
         Convert the vector to polar coordinates.
@@ -303,7 +312,7 @@ class Vector:
         return d - d.dot(normal) * normal + origin
 
 
-def vec(x: float | adsk.core.Point3D | adsk.core.Vector3D = 0, y = 0.0, z = 0.0):
+def vec(x: float | adsk.core.Point3D | adsk.core.Vector3D = 0.0, y=0.0, z=0.0):
     """
     Create a 3D vector with the given x, y and z coordinates.
 
