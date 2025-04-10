@@ -32,15 +32,21 @@ def matrix_flip_axes(
 
 def matrix_rotate(
     angle: float,
-    axis: adsk.core.Vector3D = adsk.core.Vector3D.create(z=1),
-    center: adsk.core.Point3D = adsk.core.Point3D.create(),
-    translation: adsk.core.Vector3D | None = None,
+    axis: adsk.core.Vector3D | vector.Vector = adsk.core.Vector3D.create(z=1),
+    center: adsk.core.Point3D | vector.Vector = adsk.core.Point3D.create(),
+    translation: adsk.core.Vector3D | vector.Vector | None = None,
     base: adsk.core.Matrix3D | None = None,
 ):
     matrix = adsk.core.Matrix3D.create()
-    matrix.setToRotation(angle, axis, center)
+    if isinstance(axis, vector.Vector):
+        axis = vector3d(axis.x, axis.y, axis.z)
+    if isinstance(center, vector.Vector):
+        center = point3d(center.x, center.y, center.z)
+    if isinstance(translation, vector.Vector):
+        translation = vector3d(translation.x, translation.y, translation.z)
+    matrix.setToRotation(angle, axis, center)  # type: ignore[arg-type]
     if translation is not None:
-        matrix.translation = translation
+        matrix.translation = translation  # type: ignore[assignment]
     if base is None:
         return matrix
     base.transformBy(matrix)
