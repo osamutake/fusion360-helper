@@ -8,7 +8,7 @@ from .point3d import point3d
 
 
 def sketch_fix_all(sketch: adsk.fusion.Sketch):
-    """Fix all sketch constraints"""
+    """Fix all sketch contents."""
     for p in sketch.sketchPoints:
         p.isFixed = True
     for c in sketch.sketchCurves:

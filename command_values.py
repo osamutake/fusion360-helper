@@ -1,9 +1,20 @@
+"""Utility functions to store and retrieve command values
+in design attributes.
+load_command_values(cmd) - load command values from design attributes
+store_command_values(cmd) - store command values in design attributes
+"""
+
 from __future__ import annotations
 from typing import cast
 
 import adsk.core, adsk.fusion
 
+
 def load_command_values(cmd: adsk.core.Command):
+    """Load command values from design attributes and
+    fill the input fields of the command.
+    It returns a dictionary with the default values of the command inputs.
+    """
     design = adsk.fusion.Design.cast(adsk.core.Application.get().activeProduct)
     command_name = cmd.parentCommandDefinition.id
     default_values = get_command_values(cmd.commandInputs)
@@ -15,6 +26,8 @@ def load_command_values(cmd: adsk.core.Command):
 
 
 def store_command_values(cmd: adsk.core.Command):
+    """Store command values in design attributes."""
+
     design = adsk.fusion.Design.cast(adsk.core.Application.get().activeProduct)
     command_name = cmd.parentCommandDefinition.id
     values = get_command_values(cmd.commandInputs)
@@ -22,7 +35,12 @@ def store_command_values(cmd: adsk.core.Command):
         design.attributes.add(command_name, key, value)
 
 
-def get_command_values(items: adsk.core.CommandInputs, prepend: str = "") -> dict[str, str]:
+def get_command_values(
+    items: adsk.core.CommandInputs, prepend: str = ""
+) -> dict[str, str]:
+    """Create a dictionary with the command values.
+    The key is prepend + item.id and the value is the command value.
+    """
     result: dict[str, str] = {}
     for item in items:
         if item.commandInputs != items:
@@ -30,14 +48,22 @@ def get_command_values(items: adsk.core.CommandInputs, prepend: str = "") -> dic
         key = prepend + item.id
         match item.objectType:
             case "adsk::core::TabCommandInput":
-                result[key] = "1" if cast(adsk.core.TabCommandInput, item).isActive else "0"
+                result[key] = (
+                    "1" if cast(adsk.core.TabCommandInput, item).isActive else "0"
+                )
                 result.update(
-                    get_command_values(cast(adsk.core.TabCommandInput, item).children, key + ".")
+                    get_command_values(
+                        cast(adsk.core.TabCommandInput, item).children, key + "."
+                    )
                 )
             case "adsk::core::GroupCommandInput":
-                result[key] = "1" if cast(adsk.core.GroupCommandInput, item).isExpanded else "0"
+                result[key] = (
+                    "1" if cast(adsk.core.GroupCommandInput, item).isExpanded else "0"
+                )
                 result.update(
-                    get_command_values(cast(adsk.core.GroupCommandInput, item).children, key + ".")
+                    get_command_values(
+                        cast(adsk.core.GroupCommandInput, item).children, key + "."
+                    )
                 )
             # case "adsk::core::ImageCommandInput":
             #     cast(adsk.core.ImageCommandInput, item).imageFile = str(value)
@@ -46,18 +72,23 @@ def get_command_values(items: adsk.core.CommandInputs, prepend: str = "") -> dic
             #     cast(adsk.core.TableCommandInput, item).commandInputs
             case "adsk::core::TriadCommandInput":
                 result[key] = ",".join(
-                    str(f) for f in cast(adsk.core.TriadCommandInput, item).transform.asArray()
+                    str(f)
+                    for f in cast(adsk.core.TriadCommandInput, item).transform.asArray()
                 )
             case "adsk::core::ValueCommandInput":
                 result[key] = str(cast(adsk.core.ValueCommandInput, item).value)
             case "adsk::core::BoolValueCommandInput":
-                result[key] = "1" if cast(adsk.core.BoolValueCommandInput, item).value else "0"
+                result[key] = (
+                    "1" if cast(adsk.core.BoolValueCommandInput, item).value else "0"
+                )
             case "adsk::core::TextBoxCommandInput":
                 result[key] = cast(adsk.core.TextBoxCommandInput, item).text
             # case "adsk::core::BrowserCommandInput":
             #     cast(adsk.core.BrowserCommandInput, item).htmlFileURL
             case "adsk::core::DropDownCommandInput":
-                result[key] = str(cast(adsk.core.DropDownCommandInput, item).selectedItem.index)
+                result[key] = str(
+                    cast(adsk.core.DropDownCommandInput, item).selectedItem.index
+                )
             # case "adsk::core::ButtonRowCommandInput":
             #     cast(adsk.core.ButtonRowCommandInput, item).listItems
             # case "adsk::core::DirectionCommandInput":
@@ -87,13 +118,16 @@ def get_command_values(items: adsk.core.CommandInputs, prepend: str = "") -> dic
                 if integer_slider.hasTwoSliders:
                     result[key] += "," + str(integer_slider.valueTwo)
             case "adsk::core::IntegerSpinnerCommandInput":
-                result[key] = str(cast(adsk.core.IntegerSpinnerCommandInput, item).value)
+                result[key] = str(
+                    cast(adsk.core.IntegerSpinnerCommandInput, item).value
+                )
             # case "adsk::core::RadioButtonGroupCommandInput":
             #     cast(adsk.core.RadioButtonGroupCommandInput, item).listItems
     return result
 
 
 def set_command_value(items: adsk.core.CommandInputs, key: str, value: str):
+    """Set the value of a CommandInput corresponding to the given key."""
     name, *children = key.split(".", 2)
     item = items.itemById(name)
     if item is None:
@@ -134,7 +168,9 @@ def set_command_value(items: adsk.core.CommandInputs, key: str, value: str):
         # case "adsk::core::BrowserCommandInput":
         #     cast(adsk.core.BrowserCommandInput, item).htmlFileURL
         case "adsk::core::DropDownCommandInput":
-            cast(adsk.core.DropDownCommandInput, item).listItems[int(value)].isSelected = True
+            cast(adsk.core.DropDownCommandInput, item).listItems[
+                int(value)
+            ].isSelected = True
         # case "adsk::core::ButtonRowCommandInput":
         #     cast(adsk.core.ButtonRowCommandInput, item).listItems
         # case "adsk::core::DirectionCommandInput":

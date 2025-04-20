@@ -21,37 +21,52 @@ def comp_built_joint_revolute(
         | adsk.fusion.BRepEdge
         | adsk.fusion.SketchCurve
     ),
-    direction_or_axis_with_context: int | adsk.fusion.JointDirections | adsk.core.Base
-     = cast(adsk.fusion.JointDirections, adsk.fusion.JointDirections.ZAxisJointDirection),
+    direction_or_axis_with_context: (
+        int | adsk.fusion.JointDirections | adsk.core.Base
+    ) = cast(
+        adsk.fusion.JointDirections, adsk.fusion.JointDirections.ZAxisJointDirection
+    ),
     point_type: adsk.fusion.JointKeyPointTypes | int | None = None,
 ):
     if isinstance(obj, adsk.fusion.BRepFace):
         geo = adsk.fusion.JointGeometry.createByPlanarFace(
             obj,
             cast(adsk.fusion.BRepEdge, None),
-            cast(
-                adsk.fusion.JointKeyPointTypes,
-                adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
-            ) if point_type is None else cast(adsk.fusion.JointKeyPointTypes, point_type)
+            (
+                cast(
+                    adsk.fusion.JointKeyPointTypes,
+                    adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
+                )
+                if point_type is None
+                else cast(adsk.fusion.JointKeyPointTypes, point_type)
+            ),
         )
     elif isinstance(obj, adsk.fusion.Profile):
         geo = adsk.fusion.JointGeometry.createByProfile(
             obj,
             cast(adsk.fusion.SketchCurve, None),
-            cast(
-                adsk.fusion.JointKeyPointTypes,
-                adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
-            ) if point_type is None else cast(adsk.fusion.JointKeyPointTypes, point_type)
+            (
+                cast(
+                    adsk.fusion.JointKeyPointTypes,
+                    adsk.fusion.JointKeyPointTypes.CenterKeyPoint,
+                )
+                if point_type is None
+                else cast(adsk.fusion.JointKeyPointTypes, point_type)
+            ),
         )
     elif isinstance(obj, adsk.fusion.SketchCurve) or isinstance(
         obj, adsk.fusion.BRepEdge
     ):
         geo = adsk.fusion.JointGeometry.createByCurve(
             obj,
-            cast(
-                adsk.fusion.JointKeyPointTypes,
-                adsk.fusion.JointKeyPointTypes.StartKeyPoint,
-            ) if point_type is None else cast(adsk.fusion.JointKeyPointTypes, point_type)
+            (
+                cast(
+                    adsk.fusion.JointKeyPointTypes,
+                    adsk.fusion.JointKeyPointTypes.StartKeyPoint,
+                )
+                if point_type is None
+                else cast(adsk.fusion.JointKeyPointTypes, point_type)
+            ),
         )
     else:
         geo = adsk.fusion.JointGeometry.createByPoint(obj)

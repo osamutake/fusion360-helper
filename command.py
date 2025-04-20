@@ -1,18 +1,20 @@
 from __future__ import annotations
 import traceback
 from collections.abc import Callable
-from typing import Generic, TypeVar, override
+from typing import override
 
 import adsk.core, adsk.fusion
 from .helpers import message_box, value_input
 from .command_values import load_command_values, store_command_values
 
 
+# Dummy list of the event handlers to prevent them from being garbage collected.
+
 # We can not use the type adsk.core.EventHandler directly here
 # because adsk.core.EventHandler does not exists at runtime.
 # AttributeError: module 'adsk.core' has no attribute 'EventHandler' will be raised.
 # _handlers: list[adsk.core.EventHandler] = []
-_handlers: list[
+type EventHandler = (
     adsk.core.ApplicationCommandEventHandler
     | adsk.core.CommandCreatedEventHandler
     | adsk.core.CommandEventHandler
@@ -20,7 +22,10 @@ _handlers: list[
     | adsk.core.ValidateInputsEventHandler
     | adsk.core.KeyboardEventHandler
     | adsk.core.MouseEventHandler
-] = []
+)
+_handlers: list[EventHandler] = []
+
+# Universal event handlers that handle events with given callback function.
 
 
 class CommandEventHandler(adsk.core.CommandEventHandler):
@@ -29,7 +34,10 @@ class CommandEventHandler(adsk.core.CommandEventHandler):
         _handlers.append(self)
         self.handler = handler
 
-    def notify(self, args: adsk.core.CommandEventArgs):  # pylint: disable=arguments-renamed
+    @override
+    def notify(
+        self, args: adsk.core.CommandEventArgs
+    ):  # pylint: disable=arguments-renamed
         try:
             self.handler(args)
         except:  # pylint: disable=bare-except
@@ -42,7 +50,10 @@ class InputChangedHandler(adsk.core.InputChangedEventHandler):
         _handlers.append(self)
         self.handler = handler
 
-    def notify(self, args):  # pylint: disable=arguments-renamed
+    @override
+    def notify(
+        self, args: adsk.core.InputChangedEventArgs
+    ):  # pylint: disable=arguments-renamed
         try:
             self.handler(args)
         except:  # pylint: disable=bare-except
@@ -55,7 +66,10 @@ class ValidateInputsEventHandler(adsk.core.ValidateInputsEventHandler):
         _handlers.append(self)
         self.handler = handler
 
-    def notify(self, args):  # pylint: disable=arguments-renamed
+    @override
+    def notify(
+        self, args: adsk.core.ValidateInputsEventArgs
+    ):  # pylint: disable=arguments-renamed
         try:
             self.handler(args)
         except:  # pylint: disable=bare-except
@@ -68,7 +82,10 @@ class CommandCreatedEventHandler(adsk.core.CommandCreatedEventHandler):
         _handlers.append(self)
         self.handler = handler
 
-    def notify(self, args):  # pylint: disable=arguments-renamed
+    @override
+    def notify(
+        self, args: adsk.core.CommandCreatedEventArgs
+    ):  # pylint: disable=arguments-renamed
         try:
             self.handler(args)
         except:  # pylint: disable=bare-except
@@ -81,7 +98,9 @@ class KeyboardEventHandler(adsk.core.KeyboardEventHandler):
         _handlers.append(self)
         self.handler = handler
 
-    def notify(self, args):  # pylint: disable=arguments-renamed
+    def notify(
+        self, args: adsk.core.KeyboardEventArgs
+    ):  # pylint: disable=arguments-renamed
         try:
             self.handler(args)
         except:  # pylint: disable=bare-except
@@ -94,7 +113,9 @@ class MouseEventHandler(adsk.core.MouseEventHandler):
         _handlers.append(self)
         self.handler = handler
 
-    def notify(self, args):  # pylint: disable=arguments-renamed
+    def notify(
+        self, args: adsk.core.MouseEventArgs
+    ):  # pylint: disable=arguments-renamed
         try:
             self.handler(args)
         except:  # pylint: disable=bare-except
@@ -102,10 +123,16 @@ class MouseEventHandler(adsk.core.MouseEventHandler):
 
 
 class Command:
+    """Universal command class for Fusion 360 add-ins.
+    It handles the command lifecycle events by its methods
+    providing a simple interface for creating user commands."""
+
     processing = False
     default_values: dict[str, str]
 
-    def __init__(self, _id: str, name: str, tooltip: str = "", resource_folder: str = ""):
+    def __init__(
+        self, _id: str, name: str, tooltip: str = "", resource_folder: str = ""
+    ):
         ui = adsk.core.Application.get().userInterface
         self.cmd_def = ui.commandDefinitions.itemById(_id)
         if not self.cmd_def:  # create if not exists
@@ -116,7 +143,9 @@ class Command:
         def command_created(args: adsk.core.CommandCreatedEventArgs):
             command = args.command
             command.inputChanged.add(InputChangedHandler(self.on_changed))
-            command.validateInputs.add(ValidateInputsEventHandler(self.on_validate_inputs))
+            command.validateInputs.add(
+                ValidateInputsEventHandler(self.on_validate_inputs)
+            )
             command.activate.add(CommandEventHandler(self.on_activate))
             command.deactivate.add(CommandEventHandler(self.on_deactivate))
             command.execute.add(CommandEventHandler(self.on_execute))
@@ -153,7 +182,9 @@ class Command:
     def on_changed(self, args: adsk.core.InputChangedEventArgs | None):
         pass  # to be overridden
 
-    def on_execute_or_preview(self, args: adsk.core.CommandEventArgs, is_preview: bool = False):
+    def on_execute_or_preview(
+        self, args: adsk.core.CommandEventArgs, is_preview: bool = False
+    ):
         pass  # to be overridden
 
     def on_execute(self, args: adsk.core.CommandEventArgs):
@@ -228,34 +259,44 @@ class Command:
         pass  # to be overridden
 
 
-T = TypeVar("T")
+class TabInput[Parent]:
+    """Each tab of a TabbedCommand should be derived from this class.
+    It provides a simple interface for creating tabbed commands."""
 
-
-class TabInput(Generic[T]):
     tab: adsk.core.TabCommandInput
     id = ""
     name = ""
 
     def __init__(
-        self, args: adsk.core.CommandCreatedEventArgs, inputs: adsk.core.CommandInputs, parent: T
+        self,
+        args: adsk.core.CommandCreatedEventArgs,
+        inputs: adsk.core.CommandInputs,
+        parent: Parent,
     ):
         self.parent = parent
         if self.id == "" or self.name == "":
-            raise NotImplementedError("Not implemented correctly")
+            raise NotImplementedError("Give id and name for the tab.")
         self.tab = inputs.addTabCommandInput(self.id, self.name)
         self.on_created(args, self.tab.children)
 
-    def on_created(self, args: adsk.core.CommandCreatedEventArgs, inputs: adsk.core.CommandInputs):
+    def on_created(
+        self, args: adsk.core.CommandCreatedEventArgs, inputs: adsk.core.CommandInputs
+    ):
         pass  # to be overridden
 
     def on_changed(self, args: adsk.core.InputChangedEventArgs | None):
         pass  # to be overridden
 
-    def on_execute_or_preview(self, args: adsk.core.CommandEventArgs, is_preview: bool = False):
+    def on_execute_or_preview(
+        self, args: adsk.core.CommandEventArgs, is_preview: bool = False
+    ):
         pass  # to be overridden
 
 
 class TabbedCommand(Command):
+    """Command with tabs. Each tab has its own execution context.
+    Each tab should be derived from TabInput class."""
+
     tabs: list[TabInput] = []
 
     def __init__(
@@ -285,7 +326,9 @@ class TabbedCommand(Command):
             tab.on_changed(args)
 
     @override
-    def on_execute_or_preview(self, args: adsk.core.CommandEventArgs, is_preview: bool = False):
+    def on_execute_or_preview(
+        self, args: adsk.core.CommandEventArgs, is_preview: bool = False
+    ):
         if not is_preview:
             # store the parameters into design attributes
             store_command_values(args.command)
