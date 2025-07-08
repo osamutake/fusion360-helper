@@ -19,8 +19,8 @@ def sketch_fix_all(sketch: adsk.fusion.Sketch):
 
 def sketch_line(
     sketch: adsk.fusion.Sketch,
-    p1: Vector | adsk.core.Point3D,
-    p2: Vector | adsk.core.Point3D,
+    p1: Vector | adsk.core.Point3D | adsk.fusion.SketchPoint,
+    p2: Vector | adsk.core.Point3D | adsk.fusion.SketchPoint,
 ):
     """Add a line by two points, accepting both Vector and Point3D types."""
     if isinstance(p1, Vector):
