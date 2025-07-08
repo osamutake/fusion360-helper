@@ -350,11 +350,15 @@ def comp_mirror(
     comp: adsk.fusion.Component,
     entities: adsk.core.Base | Iterable[adsk.core.Base],
     plane: adsk.core.Base,
-):
+    combine: bool = True,
+    compute: adsk.fusion.PatternComputeOptions | int = adsk.fusion.PatternComputeOptions.AdjustPatternCompute,
+  ):
     inp = comp.features.mirrorFeatures.createInput(
         collection(entities),
         plane,
     )
+    inp.isCombine = combine
+    inp.patternComputeOption = cast(adsk.fusion.PatternComputeOptions, compute)
     return comp.features.mirrorFeatures.add(inp)
 
 
@@ -415,10 +419,23 @@ def comp_extrude(
     solid: bool = True,
     through_all: bool | tuple[bool, bool] = False,
     negative_direction: bool = False,
+    offset: float | str = 0,
+    thin_extrude: bool = False,
+    thin_extrude_thickness: float | str | tuple[float | str, float | str] = "1mm",
+    thin_extrude_wall_location: (
+        adsk.fusion.ThinExtrudeWallLocation
+        | tuple[
+            adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation
+        ]
+    ) = cast(
+        adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Side1
+    ),
 ):
     inp = comp.features.extrudeFeatures.createInput(
         collection(profiles), cast(adsk.fusion.FeatureOperations, operation)
     )
+    inp.startExtent = adsk.fusion.OffsetStartDefinition.create(value_input(offset))
+    inp.isThinExtrude = thin_extrude
     if isinstance(distance, tuple):
         if not isinstance(taper_angle, tuple):
             taper_angle = (taper_angle, taper_angle)
@@ -428,12 +445,24 @@ def comp_extrude(
             full_length = (full_length, full_length)
         if not isinstance(through_all, tuple):
             through_all = (through_all, through_all)
+        if not isinstance(thin_extrude_thickness, tuple):
+            thin_extrude_thickness = (thin_extrude_thickness, thin_extrude_thickness)
+        if not isinstance(thin_extrude_wall_location, tuple):
+            thin_extrude_wall_location = (
+                thin_extrude_wall_location,
+                thin_extrude_wall_location,
+            )
         extent1 = distance_extent(
             distance[0], symmetric[0], full_length[0], through_all[0]
         )
         extent2 = distance_extent(
             distance[1], symmetric[1], full_length[1], through_all[1]
         )
+        if thin_extrude:
+            inp.thinExtrudeWallLocationOne = thin_extrude_wall_location[0]
+            inp.thinExtrudeWallLocationTwo = thin_extrude_wall_location[1]
+            inp.thinExtrudeWallThicknessOne = value_input(thin_extrude_thickness[0])
+            inp.thinExtrudeWallThicknessTwo = value_input(thin_extrude_thickness[1])
         adsk.fusion.ThroughAllExtentDefinition.create()
         cast(
             Callable[
@@ -461,6 +490,13 @@ def comp_extrude(
             full_length = full_length[0]
         if isinstance(through_all, tuple):
             through_all = through_all[0]
+        if isinstance(thin_extrude_thickness, tuple):
+            thin_extrude_thickness = thin_extrude_thickness[0]
+        if isinstance(thin_extrude_wall_location, tuple):
+            thin_extrude_wall_location = thin_extrude_wall_location[0]
+        if thin_extrude:
+            inp.thinExtrudeWallLocationOne = thin_extrude_wall_location
+            inp.thinExtrudeWallThicknessOne = value_input(thin_extrude_thickness)
         extent1 = distance_extent(distance, symmetric, full_length, through_all)
         direction = (
             adsk.fusion.ExtentDirections.NegativeExtentDirection
