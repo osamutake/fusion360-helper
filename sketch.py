@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import cast
 
 import adsk.core, adsk.fusion
 
@@ -29,6 +30,99 @@ def sketch_line(
         p2 = point3d(p2)
 
     return sketch.sketchCurves.sketchLines.addByTwoPoints(p1, p2)  # type: ignore[arg-type]
+
+
+def sketch_rectangle(
+    sketch: adsk.fusion.Sketch,
+    corner1: Vector | adsk.core.Point3D | adsk.fusion.SketchPoint,
+    corner2: Vector | adsk.core.Point3D | adsk.fusion.SketchPoint,
+    origin: adsk.fusion.SketchPoint | None = None,
+    fillet: float | None = None,
+):
+    """Add a rectangle defined by two corner points."""
+
+    p1 = corner1.geometry if isinstance(corner1, adsk.fusion.SketchPoint) else corner1
+    p2 = corner2.geometry if isinstance(corner2, adsk.fusion.SketchPoint) else corner2
+    l1 = sketch_line(sketch, corner1, Vector(p2.x, p1.y))
+    sketch.geometricConstraints.addHorizontal(l1)
+    l2 = sketch_line(sketch, l1.endSketchPoint, corner2)
+    sketch.geometricConstraints.addVertical(l2)
+    l3 = sketch_line(sketch, l2.endSketchPoint, Vector(p1.x, p2.y))
+    sketch.geometricConstraints.addHorizontal(l3)
+    l4 = sketch_line(sketch, l3.endSketchPoint, l1.startSketchPoint)
+    sketch.geometricConstraints.addVertical(l4)
+    sketch.sketchDimensions.addDistanceDimension(
+        l1.startSketchPoint,
+        l1.endSketchPoint,
+        cast(
+            adsk.fusion.DimensionOrientations,
+            adsk.fusion.DimensionOrientations.HorizontalDimensionOrientation,
+        ),
+        point3d((p1.x + p2.x) / 2, p1.y - 0.2),
+    )
+    sketch.sketchDimensions.addDistanceDimension(
+        l4.startSketchPoint,
+        l4.endSketchPoint,
+        cast(
+            adsk.fusion.DimensionOrientations,
+            adsk.fusion.DimensionOrientations.VerticalDimensionOrientation,
+        ),
+        point3d(p1.x - 0.2, (p1.y + p2.y) / 2),
+    )
+    if origin is not None:
+        if origin.geometry.x == p1.x and origin.geometry.y == p1.y:
+            # sketch.geometricConstraints.addCoincident(l1.startSketchPoint, origin)
+            pass
+        else:
+            if origin.geometry.x == p1.x:
+                sketch.geometricConstraints.addCoincident(
+                    origin,
+                    l4,
+                )
+            else:
+                sketch.sketchDimensions.addDistanceDimension(
+                    origin,
+                    l1.startSketchPoint,
+                    cast(
+                        adsk.fusion.DimensionOrientations,
+                        adsk.fusion.DimensionOrientations.HorizontalDimensionOrientation,
+                    ),
+                    point3d((origin.geometry.x + p1.x) / 2, origin.geometry.y - 0.2),
+                )
+            if origin.geometry.y == p1.y:
+                sketch.geometricConstraints.addCoincident(
+                    origin,
+                    l1,
+                )
+            else:
+                sketch.sketchDimensions.addDistanceDimension(
+                    origin,
+                    l1.startSketchPoint,
+                    cast(
+                        adsk.fusion.DimensionOrientations,
+                        adsk.fusion.DimensionOrientations.VerticalDimensionOrientation,
+                    ),
+                    point3d(origin.geometry.x - 0.2, (origin.geometry.y + p1.y) / 2),
+                )
+    if fillet is None:
+        return [l1, l2, l3, l4]
+    f1 = sketch.sketchCurves.sketchArcs.addFillet(
+        l1, l1.startSketchPoint.geometry, l4, l4.endSketchPoint.geometry, fillet
+    )
+    f2 = sketch.sketchCurves.sketchArcs.addFillet(
+        l2, l2.startSketchPoint.geometry, l1, l1.endSketchPoint.geometry, fillet
+    )
+    f3 = sketch.sketchCurves.sketchArcs.addFillet(
+        l3, l3.startSketchPoint.geometry, l2, l2.endSketchPoint.geometry, fillet
+    )
+    f4 = sketch.sketchCurves.sketchArcs.addFillet(
+        l4, l4.startSketchPoint.geometry, l3, l3.endSketchPoint.geometry, fillet
+    )
+    sketch.sketchDimensions.addRadialDimension(f1, point3d(-2 * fillet, -2 * fillet, 0))
+    sketch.geometricConstraints.addEqual(f1, f2)
+    sketch.geometricConstraints.addEqual(f2, f3)
+    sketch.geometricConstraints.addEqual(f3, f4)
+    return [l1, l2, l3, l4, f1, f2, f3, f4]
 
 
 def sketch_fitted_splines(
