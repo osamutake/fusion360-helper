@@ -351,8 +351,10 @@ def comp_mirror(
     entities: adsk.core.Base | Iterable[adsk.core.Base],
     plane: adsk.core.Base,
     combine: bool = True,
-    compute: adsk.fusion.PatternComputeOptions | int = adsk.fusion.PatternComputeOptions.AdjustPatternCompute,
-  ):
+    compute: (
+        adsk.fusion.PatternComputeOptions | int
+    ) = adsk.fusion.PatternComputeOptions.AdjustPatternCompute,
+):
     inp = comp.features.mirrorFeatures.createInput(
         collection(entities),
         plane,
@@ -427,6 +429,8 @@ def comp_extrude(
         | tuple[
             adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation
         ]
+        | int
+        | tuple[int, int]
     ) = cast(
         adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Side1
     ),
@@ -449,8 +453,8 @@ def comp_extrude(
             thin_extrude_thickness = (thin_extrude_thickness, thin_extrude_thickness)
         if not isinstance(thin_extrude_wall_location, tuple):
             thin_extrude_wall_location = (
-                thin_extrude_wall_location,
-                thin_extrude_wall_location,
+                cast(adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location),
+                cast(adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location),
             )
         extent1 = distance_extent(
             distance[0], symmetric[0], full_length[0], through_all[0]
@@ -459,8 +463,12 @@ def comp_extrude(
             distance[1], symmetric[1], full_length[1], through_all[1]
         )
         if thin_extrude:
-            inp.thinExtrudeWallLocationOne = thin_extrude_wall_location[0]
-            inp.thinExtrudeWallLocationTwo = thin_extrude_wall_location[1]
+            inp.thinExtrudeWallLocationOne = cast(
+                adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location[0]
+            )
+            inp.thinExtrudeWallLocationTwo = cast(
+                adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location[1]
+            )
             inp.thinExtrudeWallThicknessOne = value_input(thin_extrude_thickness[0])
             inp.thinExtrudeWallThicknessTwo = value_input(thin_extrude_thickness[1])
         adsk.fusion.ThroughAllExtentDefinition.create()
