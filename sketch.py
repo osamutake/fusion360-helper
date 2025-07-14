@@ -217,3 +217,18 @@ def sketch_arc_center_start_end(
         end = point3d(end)
 
     return sketch.sketchCurves.sketchArcs.addByCenterStartEnd(center, start, end)  # type: ignore[arg-type]
+
+
+class DimensionOrientations:
+    aligned = cast(
+        adsk.fusion.DimensionOrientations,
+        adsk.fusion.DimensionOrientations.AlignedDimensionOrientation,
+    )
+    horizontal = cast(
+        adsk.fusion.DimensionOrientations,
+        adsk.fusion.DimensionOrientations.HorizontalDimensionOrientation,
+    )
+    vertical = cast(
+        adsk.fusion.DimensionOrientations,
+        adsk.fusion.DimensionOrientations.VerticalDimensionOrientation,
+    )

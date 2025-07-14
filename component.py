@@ -504,7 +504,9 @@ def comp_extrude(
         if isinstance(thin_extrude_wall_location, tuple):
             thin_extrude_wall_location = thin_extrude_wall_location[0]
         if thin_extrude:
-            inp.thinExtrudeWallLocationOne = cast(adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location)
+            inp.thinExtrudeWallLocationOne = cast(
+                adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location
+            )
             inp.thinExtrudeWallThicknessOne = value_input(thin_extrude_thickness)
         extent1 = distance_extent(distance, symmetric, full_length, through_all)
         direction = (
@@ -621,3 +623,15 @@ class FeatureOperations:
 
     def __init__(self):
         pass
+
+
+class ThinExtrudeWallLocation:
+    center = cast(
+        adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Center
+    )
+    side1 = cast(
+        adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Side1
+    )
+    side2 = cast(
+        adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Side2
+    )
