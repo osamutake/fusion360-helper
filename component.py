@@ -240,11 +240,12 @@ def comp_rectangular_pattern(
     )
     if symmetric:
         inp.isSymmetricInDirectionOne = True
-    if (
-        isinstance(axis, tuple)
-        and isinstance(quantity, tuple)
-        and isinstance(distance, tuple)
-    ):
+    if isinstance(axis, tuple):
+
+        if not isinstance(quantity, tuple):
+            quantity = (quantity, quantity)
+        if not isinstance(distance, tuple):
+            distance = (distance, distance)
         inp.setDirectionTwo(axis[1], value_input(quantity[1]), value_input(distance[1]))
         if symmetric:
             inp.isSymmetricInDirectionTwo = True
@@ -503,7 +504,7 @@ def comp_extrude(
         if isinstance(thin_extrude_wall_location, tuple):
             thin_extrude_wall_location = thin_extrude_wall_location[0]
         if thin_extrude:
-            inp.thinExtrudeWallLocationOne = thin_extrude_wall_location
+            inp.thinExtrudeWallLocationOne = cast(adsk.fusion.ThinExtrudeWallLocation, thin_extrude_wall_location)
             inp.thinExtrudeWallThicknessOne = value_input(thin_extrude_thickness)
         extent1 = distance_extent(distance, symmetric, full_length, through_all)
         direction = (
