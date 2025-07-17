@@ -351,7 +351,7 @@ def comp_mirror(
     comp: adsk.fusion.Component,
     entities: adsk.core.Base | Iterable[adsk.core.Base],
     plane: adsk.core.Base,
-    combine: bool = True,
+    combine: bool = False,
     compute: (
         adsk.fusion.PatternComputeOptions | int
     ) = adsk.fusion.PatternComputeOptions.AdjustPatternCompute,
