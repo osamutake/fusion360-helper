@@ -639,3 +639,16 @@ class ThinExtrudeWallLocation:
     side2 = cast(
         adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Side2
     )
+
+
+def comp_construct_plane_by_offset(
+    comp: adsk.fusion.Component,
+    plane: adsk.core.Base,
+    offset: float | str | adsk.core.ValueInput,
+    occurrence_of_plane: adsk.fusion.Occurrence | None = None,
+):
+    inp = comp.constructionPlanes.createInput(
+        cast(adsk.fusion.Occurrence, occurrence_of_plane)
+    )
+    inp.setByOffset(plane, value_input(offset))
+    return comp.constructionPlanes.add(inp)
