@@ -423,8 +423,7 @@ def comp_extrude(
     through_all: bool | tuple[bool, bool] = False,
     negative_direction: bool = False,
     offset: float | str = 0,
-    thin_extrude: bool = False,
-    thin_extrude_thickness: float | str | tuple[float | str, float | str] = "1mm",
+    thin_extrude_thickness: float | str | tuple[float | str, float | str] = 0,
     thin_extrude_wall_location: (
         adsk.fusion.ThinExtrudeWallLocation
         | tuple[
@@ -440,6 +439,7 @@ def comp_extrude(
         collection(profiles), cast(adsk.fusion.FeatureOperations, operation)
     )
     inp.startExtent = adsk.fusion.OffsetStartDefinition.create(value_input(offset))
+    thin_extrude = thin_extrude_thickness != 0
     inp.isThinExtrude = thin_extrude
     if isinstance(distance, tuple):
         if not isinstance(taper_angle, tuple):
