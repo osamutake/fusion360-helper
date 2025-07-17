@@ -435,6 +435,10 @@ def comp_extrude(
         adsk.fusion.ThinExtrudeWallLocation, adsk.fusion.ThinExtrudeWallLocation.Side1
     ),
 ):
+    profiles = [
+        p if not isinstance(p, adsk.fusion.SketchCurve) else comp.createOpenProfile(p)
+        for p in collection(profiles)
+    ]
     inp = comp.features.extrudeFeatures.createInput(
         collection(profiles), cast(adsk.fusion.FeatureOperations, operation)
     )
