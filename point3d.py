@@ -20,8 +20,18 @@ def point3d(
     return adsk.core.Point3D.create(x, y, z)
 
 
-def point3d_add(p1: adsk.core.Point3D, p2: adsk.core.Point3D | vector.Vector | adsk.core.Vector3D):
+def point3d_add(
+    p1: adsk.core.Point3D, p2: adsk.core.Point3D | vector.Vector | adsk.core.Vector3D
+):
     return point3d(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z)
+
+
+def point3d_mul(p1: adsk.core.Point3D, v: float):
+    return point3d(p1.x * v, p1.y * v, p1.z * v)
+
+
+def point3d_div(p1: adsk.core.Point3D, v: float):
+    return point3d_mul(p1, 1 / v)
 
 
 def point3d_polar(r: float, t: float = 0, z: float = 0):
