@@ -139,3 +139,18 @@ def camera_setup(
     view.camera = cam
 
     return previous
+
+
+def log(logs: str | list[str]):
+    app = adsk.core.Application.get()
+    text_palette: adsk.core.TextCommandPalette = cast(
+        adsk.core.TextCommandPalette,
+        app.userInterface.palettes.itemById("TextCommands"),
+    )
+    text_palette.isVisible = True
+
+    if isinstance(logs, str):
+        logs = [logs]
+    for text in logs:
+        text_palette.writeText(text)
+    adsk.doEvents()
