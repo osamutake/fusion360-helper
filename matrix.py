@@ -7,10 +7,10 @@ from .vector3d import vector3d
 from .point3d import point3d
 
 
-def matrix_flip_axes(
-    x: bool = False,
-    y: bool = False,
-    z: bool = False,
+def matrix_scale(
+    x=1.0,
+    y=1.0,
+    z=1.0,
     base: adsk.core.Matrix3D | None = None,
 ):
     matrix = adsk.core.Matrix3D.create()
@@ -20,14 +20,23 @@ def matrix_flip_axes(
         vector3d(y=1),
         vector3d(z=1),
         point3d(),
-        vector3d(x=-1 if x else 1),
-        vector3d(y=-1 if y else 1),
-        vector3d(z=-1 if z else 1),
+        vector3d(x=x),
+        vector3d(y=y),
+        vector3d(z=z),
     )
     if base is None:
         return matrix
     base.transformBy(matrix)
     return base
+
+
+def matrix_flip_axes(
+    x: bool = False,
+    y: bool = False,
+    z: bool = False,
+    base: adsk.core.Matrix3D | None = None,
+):
+    return matrix_scale(-1 if x else 1, -1 if y else 1, -1 if z else 1, base)
 
 
 def matrix_rotate(
