@@ -26,7 +26,7 @@ class Vector:
         self.z = x.z
 
     @classmethod
-    def polar(cls, radius, t):
+    def polar(cls, radius: float, t: float):
         return Vector(radius * math.cos(t), radius * math.sin(t))
 
     def __add__(self, other: Vector):
