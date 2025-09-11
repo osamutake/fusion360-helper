@@ -19,8 +19,8 @@ def sketch_fix_all(sketch: adsk.fusion.Sketch):
 
 def sketch_line(
     sketch: adsk.fusion.Sketch,
-    p1: Vector | adsk.core.Point3D,
-    p2: Vector | adsk.core.Point3D,
+    p1: Vector | adsk.core.Point3D | adsk.fusion.SketchPoint,
+    p2: Vector | adsk.core.Point3D | adsk.fusion.SketchPoint,
 ):
     """Add a line by two points, accepting both Vector and Point3D types."""
     if isinstance(p1, Vector):
@@ -32,7 +32,7 @@ def sketch_line(
 
 
 def sketch_fitted_splines(
-    sketch: adsk.fusion.Sketch, points: Iterable[Vector | adsk.core.Point3D]
+    sketch: adsk.fusion.Sketch, points: Iterable[Vector | adsk.core.Point3D | adsk.fusion.SketchPoint]
 ):
     """Add a fitted spline to the sketch using a list of points."""
     converted = [point3d(p) if isinstance(p, Vector) else p for p in points]
