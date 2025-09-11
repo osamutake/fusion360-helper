@@ -121,8 +121,12 @@ def get_command_values(
                 result[key] = str(
                     cast(adsk.core.IntegerSpinnerCommandInput, item).value
                 )
-            # case "adsk::core::RadioButtonGroupCommandInput":
-            #     cast(adsk.core.RadioButtonGroupCommandInput, item).listItems
+            case "adsk::core::RadioButtonGroupCommandInput":
+                result[key] = str(
+                    cast(
+                        adsk.core.RadioButtonGroupCommandInput, item
+                    ).selectedItem.index
+                )
     return result
 
 
@@ -203,5 +207,7 @@ def set_command_value(items: adsk.core.CommandInputs, key: str, value: str):
                 integer_slider.valueTwo = int(values[1])
         case "adsk::core::IntegerSpinnerCommandInput":
             cast(adsk.core.IntegerSpinnerCommandInput, item).value = int(value)
-        # case "adsk::core::RadioButtonGroupCommandInput":
-        #     cast(adsk.core.RadioButtonGroupCommandInput, item).listItems
+        case "adsk::core::RadioButtonGroupCommandInput":
+            cast(adsk.core.RadioButtonGroupCommandInput, item).listItems[
+                int(value)
+            ].isSelected = True

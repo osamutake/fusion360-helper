@@ -6,5 +6,6 @@ from .helpers import *
 from .matrix import *
 from .point3d import *
 from .sketch import *
+from .sketch_dimension import *
 from .vector import *
 from .vector3d import *
