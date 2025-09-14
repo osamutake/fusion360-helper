@@ -152,5 +152,6 @@ def log(logs: str | list[str]):
     if isinstance(logs, str):
         logs = [logs]
     for text in logs:
+        # @pylint: disable=no-member
         text_palette.writeText(text)
     adsk.doEvents()
