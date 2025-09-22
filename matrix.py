@@ -39,6 +39,31 @@ def matrix_flip_axes(
     return matrix_scale(-1 if x else 1, -1 if y else 1, -1 if z else 1, base)
 
 
+def matrix_wrap(
+    transform: adsk.core.Matrix3D,
+    matrix: adsk.core.Matrix3D,
+):
+    """Returns `inv(transform) * matrix * transform`."""
+    result = transform.copy()
+    result.invert()
+    result.transformBy(matrix)
+    result.transformBy(transform)
+    return result
+
+
+def matrix_wrap_inv(
+    transform: adsk.core.Matrix3D,
+    matrix: adsk.core.Matrix3D,
+):
+    """Returns `transform * matrix * inv(transform)`."""
+    result = transform.copy()
+    result.transformBy(matrix)
+    inv = transform.copy()
+    inv.invert()
+    result.transformBy(inv)
+    return result
+
+
 def matrix_rotate(
     angle: float,
     axis: adsk.core.Vector3D | vector.Vector = adsk.core.Vector3D.create(z=1),
