@@ -259,9 +259,13 @@ def comp_move_free(
     comp: adsk.fusion.Component,
     entities: adsk.core.Base | Iterable[adsk.core.Base],
     matrixes: adsk.core.Matrix3D | Iterable[adsk.core.Matrix3D],
+    occurrence: adsk.fusion.Occurrence | None = None,
 ):
     if not isinstance(matrixes, Iterable):
         matrixes = [matrixes]
+    if occurrence is not None:
+        (trans_inv := occurrence.transform2.copy()).invert()
+        matrixes = [trans_inv, *matrixes, occurrence.transform2]
     matrix = adsk.core.Matrix3D.create()
     for m in matrixes:
         matrix.transformBy(m)
